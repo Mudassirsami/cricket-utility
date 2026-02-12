@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -51,7 +52,10 @@ app = FastAPI(
     title="Cricket Club Management System",
     version="1.0.0",
     description="Production-grade cricket club management API with PIN-based role security.",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
 )
 
 app.state.limiter = limiter
@@ -69,6 +73,10 @@ allowed_origins = [
     "https://yourdomain.com",  # Replace with your actual domain
 ]
 
+# Always allow the deployed app URL
+if settings.ENVIRONMENT == "production":
+    allowed_origins.append("*")  # Allow all origins for Swagger docs
+
 if settings.ENVIRONMENT == "development":
     allowed_origins.append("*")
 
@@ -76,8 +84,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Request ID middleware
@@ -141,6 +150,9 @@ app.include_router(match_router.router)
 app.include_router(upcoming_router.router)
 app.include_router(finance_router.router)
 app.include_router(notification_router.router)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/api/health")

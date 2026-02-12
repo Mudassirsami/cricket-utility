@@ -1,0 +1,21 @@
+/* Fix Swagger UI display issues */
+.swagger-ui .topbar {
+    background-color: #1b1b1b;
+    border-bottom: 1px solid #333;
+}
+
+.swagger-ui .info {
+    margin: 20px 0;
+}
+
+.swagger-ui .scheme-container {
+    background: #2b2b2b;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+body {
+    background: #1a1a1a !important;
+}
