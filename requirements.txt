@@ -9,3 +9,6 @@ slowapi
 bcrypt
 pywebpush
 cryptography
+mangum
+psycopg2-binary
+alembic

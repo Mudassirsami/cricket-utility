@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     VAPID_PUBLIC_KEY: str = ""
     VAPID_PRIVATE_KEY: str = ""
     VAPID_EMAIL: str = "mailto:admin@aljinnahcc.com"
+    ENVIRONMENT: str = "development"  # development, staging, production
+    SECRET_KEY: str = "your-secret-key-change-in-production"  # Add for JWT/tokens if needed
+    LOG_LEVEL: str = "INFO"
+    MAX_REQUEST_SIZE: int = 10 * 1024 * 1024  # 10MB
 
     class Config:
         env_file = ".env"
