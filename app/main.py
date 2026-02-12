@@ -35,9 +35,14 @@ limiter = Limiter(key_func=get_remote_address, default_limits=[settings.RATE_LIM
 async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting up Cricket Club Management System")
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("Database tables created successfully")
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all, checkfirst=True)
+        logger.info("Database tables checked/created successfully")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        # Don't crash the app, just log the error
+        pass
     yield
     # Shutdown
     logger.info("Shutting down Cricket Club Management System")
@@ -161,13 +166,25 @@ async def health_check(request: Request):
     }
 
 
+@app.get("/")
+@limiter.limit("30/minute")
+async def root(request: Request):
+    """Root endpoint"""
+    return {
+        "message": "Cricket Club Management API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/api/health"
+    }
+
+
 @app.get("/api/metrics")
 @limiter.limit("30/minute")
 async def metrics(request: Request):
     """Basic metrics endpoint"""
     return {
         "timestamp": time.time(),
-        "uptime": time.time() - start_time if 'start_time' in globals() else 0,
+        "uptime": time.time() - start_time,
         "environment": settings.ENVIRONMENT,
         "database_url_type": "postgresql" if "postgresql" in settings.DATABASE_URL else "sqlite"
     }
